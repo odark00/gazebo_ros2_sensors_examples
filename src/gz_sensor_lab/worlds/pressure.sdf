@@ -1,0 +1,110 @@
+<?xml version="1.0" ?>
+<!--
+  Lab 0.1/1: a box carrying a barometer and an altimeter, dropped
+  from 1000 m onto the ground.
+
+  Run headless:   gz sim -s -r pressure.sdf
+  Gazebo topics:  /air_pressure 
+                  /altimeter     
+-->
+<sdf version="1.9">
+  <world name="pressure">
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+
+    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
+
+    <plugin filename="gz-sim-air-pressure-system" name="gz::sim::systems::AirPressure"/>
+    <plugin filename="gz-sim-altimeter-system" name="gz::sim::systems::Altimeter"/>
+
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <model name="ground">
+      <static>true</static>
+      <pose>0 0 -5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>100 100 10</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>100 100 10</size></box></geometry>
+          <material>
+            <ambient>0.8 0.8 0.8 1</ambient>
+            <diffuse>0.8 0.8 0.8 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Centre at 1000.5 m, so the altimeter will fall at -1000 -->
+    <model name="sensors_box">
+      <pose>0 0 1000.5 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>1.0</mass>
+          <inertia>
+            <ixx>0.1667</ixx>
+            <iyy>0.1667</iyy>
+            <izz>0.1667</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>1 1 1</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>1 1 1</size></box></geometry>
+          <material>
+            <ambient>1 0.5 0 1</ambient>
+            <diffuse>1 0.5 0 1</diffuse>
+          </material>
+        </visual>
+
+        <sensor name="altimeter" type="altimeter">
+          <always_on>1</always_on>
+          <update_rate>30</update_rate>
+          <topic>altimeter</topic>
+          <altimeter>
+            <vertical_position>
+              <noise type="gaussian">
+                <mean>0.0</mean>
+                <stddev>0.1</stddev>
+              </noise>
+            </vertical_position>
+            <vertical_velocity>
+              <noise type="gaussian">
+                <mean>0.0</mean>
+                <stddev>0.1</stddev>
+              </noise>
+            </vertical_velocity>
+          </altimeter>
+        </sensor>
+
+        <sensor name="air_pressure" type="air_pressure">
+          <always_on>1</always_on>
+          <update_rate>30</update_rate>
+          <topic>air_pressure</topic>
+          <air_pressure>
+            <!-- Height of the world origin: the ground top is at 0 m -->
+            <reference_altitude>0</reference_altitude>
+            <pressure>
+              <noise type="gaussian">
+                <mean>0.0</mean>
+                <stddev>1.0</stddev>
+              </noise>
+            </pressure>
+          </air_pressure>
+        </sensor>
+      </link>
+    </model>
+  </world>
+</sdf>

@@ -1,0 +1,21 @@
+services:
+  gazebo-ros2:
+    build: .
+    image: gazebo-ros2:latest
+    container_name: gazebo_ros2
+    network_mode: host
+    ipc: host
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - .:/root/gazebo_ros2
+    environment:
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+      - GZ_PARTITION=gazebo_ros2
+      - ROS_DOMAIN_ID=42
+      # Uncomment if Gazebo/RViz render black (no GPU in the container)
+      # - LIBGL_ALWAYS_SOFTWARE=1
+    devices:
+      - /dev/dri:/dev/dri
+    stdin_open: true
+    tty: true
